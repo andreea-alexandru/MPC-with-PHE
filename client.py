@@ -204,7 +204,7 @@ def main():
 				time_x0 = time.time() - start
 				start_cloud = time.time()
 				for k in range(0,K):
-					print(k)
+					# print(k)
 					# Receive [[t_k]]
 					data = json.loads(recv_size(connection))
 					time_cloud[k] = time.time() - start_cloud
