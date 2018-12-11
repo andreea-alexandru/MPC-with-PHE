@@ -227,7 +227,7 @@ def main():
 
 			print("Last input: ", ["%.8f"% i for i in u[T-1]])
 			print(sec)
-			with open(os.path.abspath('Results/'+str(DEFAULT_KEYSIZE)+'_'+str(lf)+'_results_CS'+'.txt'),'a+') as f: 
+			with open(os.path.abspath(str(DEFAULT_KEYSIZE)+'_'+str(lf)+'_results_CS'+'.txt'),'a+') as f: 
 				f.write("%d, %d, %d, %d, %d, %d: " % (n,m,N,Kc,Kw,T));
 				for item in sec:
   					f.write("total time %.2f " % item)
