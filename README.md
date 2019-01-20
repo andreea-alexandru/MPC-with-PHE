@@ -10,7 +10,7 @@ The file runCS.py and runSS.py are the files that run a thread for each of the t
 
 The matrices and vectors for the Model Predictive Control formulation as in the paper have to be written in files in the folder Data, with the name having name-of-matrix_number-of-states_number-of-inputs_horizon.txt. 
 
-The Paillier (and DGK for the two server case) keys should be written in files in the folder Keys. If this is not desired, the code has to be manually modified to generate them. The code will be updated soon to perform the check automatically.
+The Paillier (and DGK for the two server case) keys can be written in files in the folder Keys. If the files do not exist, the code will automatically generate the keys.
 
 The random coins for encryption and blinding can be pre-generated in order to save time in the online execution, and stored in a folder Randomness. At the moment, the code checks if files with random numbers of appropiate size exists, otherwise, it generates them from scratch.
 

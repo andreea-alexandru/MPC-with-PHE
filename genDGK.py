@@ -38,23 +38,23 @@ def keysDGK(n_length=DEFAULT_KEYSIZE,l=DEFAULT_MSGSIZE,t=DEFAULT_SECURITYSIZE):
 		len_vq = vq.bit_length()
 	n_len = 0
 	prime = 0
-	print(u,vp,vq)
+	# print(u,vp,vq)
 	while n_len != n_length:
 		fp = getprimeover((n_length//2) - l - t)
 		p = u*vp*fp + 1
-		print(p.bit_length())
+		# print(p.bit_length())
 		while (not(gmpy2.is_prime(p))):
 			fp = getprimeover((n_length//2) - l - t)
 			p = u*vp*fp + 1
 		fq = getprimeover((n_length//2) - l - t + 1)
 		q = u*vq*fq + 1
-		print(q.bit_length())
+		# print(q.bit_length())
 		while (not(gmpy2.is_prime(q))):
 			fq = getprimeover((n_length//2) - l - t + 1)
 			q = u*vq*fq + 1		
 		n = p*q
 		n_len = n.bit_length()
-		print(n_len)
+		# print(n_len)
 	
 	n = p*q
 	g,h = find_gens(p,q,u,vp,vq,fp,fq,n)
@@ -138,7 +138,7 @@ def find_gens(p,q,u,vp,vq,fp,fq,n,n_length=DEFAULT_KEYSIZE,l=DEFAULT_MSGSIZE,t=D
 	tmp2 = xq*p*inv_p % n
 	g = (tmp + tmp2) % n
 	g = gmpy2.powmod(g,fp*fq,n)
-	print(g)
+	# print(g)
 
 	# compute h as xh^(fp*fq*u) mod n
 	# xh is a prime element from Z^*_n
@@ -148,7 +148,7 @@ def find_gens(p,q,u,vp,vq,fp,fq,n,n_length=DEFAULT_KEYSIZE,l=DEFAULT_MSGSIZE,t=D
 		if(xh < n):
 			found = True
 	h = gmpy2.powmod(xh,fp*fq*u,n)
-	print(h)
+	# print(h)
 	return g,h
 
 def inverses_mod(a,b):

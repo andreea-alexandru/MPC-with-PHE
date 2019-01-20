@@ -9,6 +9,7 @@ from pathlib import Path
 import numpy as np
 import time
 import DGK
+import genDGK
 import os
 
 
@@ -18,6 +19,8 @@ DEFAULT_SECURITYSIZE = 100					# set here the default number of bits for the one
 DEFAULT_PRECISION = int(DEFAULT_MSGSIZE/2)	# set here the default number of fractional bits
 DEFAULT_DGK = 160							# set here the default security size of DGK
 # The message size of DGK has to be greater than 2*log2(DEFAULT_MSGSIZE), check u in DGK_pubkey
+KEYSIZE_DGK = 512							# set here the default number of bits of the RSA modulus for DGK
+MSGSIZE_DGK = 20							# set here the default number of bits the plaintext in DGK can have (only bits will be encrypted)
 NETWORK_DELAY = 0 		
 
 seed = 43	# pick a seed for the random generator
@@ -106,23 +109,37 @@ def retrieve_fp_matrix(mat,prec=DEFAULT_PRECISION):
 
 class Server2:
 	def __init__(self, l=DEFAULT_MSGSIZE,t_DGK=DEFAULT_DGK,sigma=DEFAULT_SECURITYSIZE):
-		filepub = "Keys/pubkey"+str(DEFAULT_KEYSIZE)+".txt"
-		with open(filepub, 'r') as fin:
-			data=[line.split() for line in fin]
-		Np = mpz(data[0][0])
-		self.N_len = Np.bit_length()		
-		pubkey = paillier.PaillierPublicKey(n=Np)
-		self.pubkey = pubkey
+		try:
+			filepub = "Keys/pubkey"+str(DEFAULT_KEYSIZE)+".txt"
+			with open(filepub, 'r') as fin:
+				data=[line.split() for line in fin]
+			Np = int(data[0][0])
+			pubkey = paillier.PaillierPublicKey(n=Np)
 
-		filepriv = "Keys/privkey"+str(DEFAULT_KEYSIZE)+".txt"
-		with open(filepriv, 'r') as fin:
-			data=[line.split() for line in fin]
-		p = mpz(data[0][0])
-		q = mpz(data[1][0])
-		self.privkey = paillier.PaillierPrivateKey(pubkey, p, q)
+			filepriv = "Keys/privkey"+str(DEFAULT_KEYSIZE)+".txt"
+			with open(filepriv, 'r') as fin:
+				data=[line.split() for line in fin]
+			p = mpz(data[0][0])
+			q = mpz(data[1][0])
+			privkey = paillier.PaillierPrivateKey(pubkey, p, q)		
+			self.pubkey = pubkey; self.privkey = privkey
+
+		except:
+			"""If the files are not available, generate the keys """
+			keypair = paillier.generate_paillier_keypair(n_length=DEFAULT_KEYSIZE)
+			self.pubkey, self.privkey = keypair
+			Np = self.pubkey.n
+			file = 'Keys/pubkey'+str(DEFAULT_KEYSIZE)+".txt"
+			with open(file, 'w') as f:
+				f.write("%d" % (self.pubkey.n))
+			file = 'Keys/privkey'+str(DEFAULT_KEYSIZE)+".txt"			
+			with open(file, 'w') as f:
+				f.write("%d\n%d" % (self.privkey.p,self.privkey.q))
+
+		self.N_len = Np.bit_length()
 		self.l = l
-		self.sigma = sigma
 		self.t_DGK = t_DGK
+		self.sigma = sigma
 		self.generate_DGK()
 
 
@@ -167,8 +184,15 @@ class Server2:
 
 
 	def generate_DGK(self):
-		file = 'Keys/DGK_keys.txt'
-		p,q,u,vp,vq,fp,fq,g,h = DGK.loadkey(file)
+		try:
+			file = 'Keys/DGK_keys'+str(KEYSIZE_DGK)+'_'+str(MSGSIZE_DGK)+'.txt'
+			p,q,u,vp,vq,fp,fq,g,h = DGK.loadkey(file)
+		except:
+			"""If the files are not available, generate the keys """
+			p,q,u,vp,vq,fp,fq,g,h = genDGK.keysDGK(KEYSIZE_DGK,MSGSIZE_DGK,self.t_DGK)
+			with open(os.path.abspath('Keys/DGK_keys'+str(KEYSIZE_DGK)+'_'+str(MSGSIZE_DGK)+'.txt'),'w') as f:
+				f.write("%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d" % (p, q, u, vp, vq, fp, fq, g, h))
+
 		n = p*q
 		self.DGK_pubkey = DGK.DGKpubkey(n,g,h,u)
 		self.DGK_privkey = DGK.DGKprivkey(p,q,vp,self.DGK_pubkey)

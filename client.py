@@ -63,29 +63,33 @@ def retrieve_fp_vector(vec,prec=DEFAULT_PRECISION):
 
 class Client:
 	def __init__(self, l=DEFAULT_MSGSIZE):
-		"""This would generate the keys on the spot"""
-		# keypair = paillier.generate_paillier_keypair(n_length=DEFAULT_KEYSIZE)
-		# self.pubkey, self.privkey = keypair
-		# file = 'Keys/pubkey'+str(DEFAULT_KEYSIZE)+".txt"
-		# with open(file, 'w') as f:
-		# 	f.write("%d" % (self.pubkey.n))
-		# file = 'Keys/privkey'+str(DEFAULT_KEYSIZE)+".txt"			
-		# with open(file, 'w') as f:
-		# 	f.write("%d\n%d" % (self.privkey.p,self.privkey.q))
-		
-		filepub = "Keys/pubkey"+str(DEFAULT_KEYSIZE)+".txt"
-		with open(filepub, 'r') as fin:
-			data=[line.split() for line in fin]
-		Np = mpz(data[0][0])
-		pubkey = paillier.PaillierPublicKey(n=Np)
-		self.pubkey = pubkey
+		try:
+			filepub = "Keys/pubkey"+str(DEFAULT_KEYSIZE)+".txt"
+			with open(filepub, 'r') as fin:
+				data=[line.split() for line in fin]
+			Np = int(data[0][0])
+			pubkey = paillier.PaillierPublicKey(n=Np)
 
-		filepriv = "Keys/privkey"+str(DEFAULT_KEYSIZE)+".txt"
-		with open(filepriv, 'r') as fin:
-			data=[line.split() for line in fin]
-		p = mpz(data[0][0])
-		q = mpz(data[1][0])
-		self.privkey = paillier.PaillierPrivateKey(pubkey, p, q)
+			filepriv = "Keys/privkey"+str(DEFAULT_KEYSIZE)+".txt"
+			with open(filepriv, 'r') as fin:
+				data=[line.split() for line in fin]
+			p = mpz(data[0][0])
+			q = mpz(data[1][0])
+			privkey = paillier.PaillierPrivateKey(pubkey, p, q)		
+			self.pubkey = pubkey; self.privkey = privkey
+
+		except:
+			"""If the files are not available, generate the keys """
+			keypair = paillier.generate_paillier_keypair(n_length=DEFAULT_KEYSIZE)
+			self.pubkey, self.privkey = keypair
+			Np = self.pubkey.n
+			file = 'Keys/pubkey'+str(DEFAULT_KEYSIZE)+".txt"
+			with open(file, 'w') as f:
+				f.write("%d" % (self.pubkey.n))
+			file = 'Keys/privkey'+str(DEFAULT_KEYSIZE)+".txt"			
+			with open(file, 'w') as f:
+				f.write("%d\n%d" % (self.privkey.p,self.privkey.q))
+
 
 	def load_data(self,n,m,N):
 		fileparam = "Data/x0"+str(n)+"_"+str(m)+"_"+str(N)+".txt"
@@ -221,11 +225,12 @@ def main():
 					start_cloud = time.time()
 				K = Kw
 				u[i] = Q_vector(U[:m])
+				print("Last input: ", ["%.8f"% i for i in u[i]])
 				x[i+1] = np.dot(A,x[i]) + np.dot(B,u[i])
+				print("Next state: ", ["%.8f"% i for i in x[i+1]])
 				sec[i] = time.time() - start
 				start = time.time()
 
-			print("Last input: ", ["%.8f"% i for i in u[T-1]])
 			print(sec)
 			with open(os.path.abspath(str(DEFAULT_KEYSIZE)+'_'+str(lf)+'_results_CS'+'.txt'),'a+') as f: 
 				f.write("%d, %d, %d, %d, %d, %d: " % (n,m,N,Kc,Kw,T));
