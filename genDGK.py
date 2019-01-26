@@ -173,5 +173,5 @@ def main():
 	# p,q,u,vp,vq,fp,fq,g,h = loadkey(file)
 
 
-if __name__ == '__main__':
-	main()
+# if __name__ == '__main__':
+# 	main()
