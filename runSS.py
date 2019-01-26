@@ -7,8 +7,8 @@ import sys
 	See https://arxiv.org/pdf/1803.09891.pdf for more details"""
  
 if __name__ == '__main__':
-	proc1 = Popen(['python','server1.py'])
-	proc2 = Popen(['python','server2.py'],stdout=PIPE)
+	proc1 = Popen(['python3','server1.py'])
+	proc2 = Popen(['python3','server2.py'],stdout=PIPE)
 	# stdout_value = proc2.communicate()[0]
 	stdout_value = proc1.communicate()[0]
 
